@@ -44,6 +44,12 @@ extern struct fann fram_ann;
 enum fann_activationfunc_enum fram_cascade_activation_functions[10 * sizeof(enum fann_activationfunc_enum)];
 */
 
+#pragma NOINIT(fram_weights)
+fann_type fram_weights [(128) * sizeof(fann_type)];
+
+#pragma NOINIT(fram_connections)
+struct fann_neuron* fram_connections [(128) * sizeof(struct fann_neuron*)];
+
 #pragma PERSISTENT(fram_cascade_activation_functions)
 enum fann_activationfunc_enum fram_cascade_activation_functions[10 * sizeof(enum fann_activationfunc_enum)] = {
                                                                                                                /*
@@ -310,33 +316,11 @@ void fann_allocate_neurons(struct fann *ann)
  */
 void fann_allocate_connections(struct fann *ann)
 {
-    ann->weights = (fann_type *) calloc(ann->total_connections, sizeof(fann_type));
-    if (ann->weights == NULL) {
-        // fann_error((struct fann_error *) ann, FANN_E_CANT_ALLOCATE_MEM);
-        return;
-    }
-#ifdef DEBUG_MALLOC
-    printf("Allocated %u bytes for weights.\n", ann->total_connections * sizeof(fann_type));
-#endif // DEBUG_MALLOC
-
+    ann->weights = fram_weights;
     ann->total_connections_allocated = ann->total_connections;
 
-    /* TODO make special cases for all places where the connections
-     * is used, so that it is not needed for fully connected networks.
-     */
-    ann->connections = (struct fann_neuron **) calloc(
-        ann->total_connections_allocated,
-        sizeof(struct fann_neuron *)
-    );
-    if (ann->connections == NULL) {
-        // fann_error((struct fann_error *) ann, FANN_E_CANT_ALLOCATE_MEM);
-        return;
+    ann->connections = fram_connections;
     }
-#ifdef DEBUG_MALLOC
-    printf("Allocated %u bytes for connections.\n", 
-            ann->total_connections_allocated * sizeof(struct fann_neuron *));
-#endif // DEBUG_MALLOC
-}
 
 FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 {
