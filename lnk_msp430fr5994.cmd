@@ -151,7 +151,7 @@ SECTIONS
         {
 
             .TI.persistent : {}              /* For #pragma persistent            */
-            .TI.noinit : {}                  /* For #pragma noinit            */
+            .TI.noinit :     {}              /* For #pragma noinit                */
             .cio           : {}              /* C I/O Buffer                      */
             .sysmem        : {}              /* Dynamic memory allocation area    */
         } PALIGN(0x0400), RUN_START(fram_rw_start)
@@ -208,7 +208,6 @@ SECTIONS
 
     .bss        : {} > RAM                  /* Global & static vars              */
     .data       : {} > RAM                  /* Global & static vars              */
-    /*.TI.noinit  : {} > RAM */                 /* For #pragma noinit                */
     .stack      : {} > RAM (HIGH)           /* Software system stack             */
 
     .tinyram    : {} > TINYRAM              /* Tiny RAM                          */
