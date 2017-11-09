@@ -3,17 +3,22 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "fann.h"
+#include "thyroid_test.h"
+#include "profiler.h"
+/*Intermittent Tester*/
+#include <tester.h>
+//#include <noise.h>
+
 /*
  *******************************************************************************
  * Task functions declaration
  *******************************************************************************
  */
 
-// Find minimum of given arrays
-//void task_find_min_f(void);
-
-// Subtract minimum from given arrays
-//void task_sub_min_f(void);
+void task_fann_load(void);
+void task_fann_test(void);
+void task_result(void);
 
 /*
  *******************************************************************************
@@ -26,6 +31,9 @@ NewTask(TASK_FANN_LOAD, task_fann_load, 1) // with self-field
 
 #pragma PERSISTENT(TASK_FANN_TEST)
 NewTask(TASK_FANN_TEST, task_fann_test, 1) // with self-field
+
+#pragma PERSISTENT(TASK_RESULT)
+NewTask(TASK_RESULT, task_result, 1) // with self-field
 
 //#pragma PERSISTENT(TASK_FIND_MIN)
 //NewTask(TASK_FIND_MIN, task_find_min_f, 1) // with self-field
@@ -40,8 +48,8 @@ NewTask(TASK_FANN_TEST, task_fann_test, 1) // with self-field
  *******************************************************************************
  */
 
-//#pragma PERSISTENT(PersState)
-//InitialTask(TASK_FIND_MIN)
+#pragma PERSISTENT(PersState)
+InitialTask(TASK_FANN_LOAD)
 
 /*
  *******************************************************************************
@@ -72,29 +80,95 @@ NewTask(TASK_FANN_TEST, task_fann_test, 1) // with self-field
 //#pragma PERSISTENT(PersSField1(TASK_SUB_MIN, sf_avg))
 //NewSelfField(TASK_SUB_MIN, sf_avg, FLOAT32, NUM_OF_ARRAYS, SELF_FIELD_CODE_2)
 
+#define PROFILE
+
 /*
  *******************************************************************************
  * main
  *******************************************************************************
  */
 
+/// TODO(rh): This has to be persistent!
+struct fann *ann;
+
 void main(void)
 {
 	WDTCTL = WDTPW | WDTHOLD;	// stop watchdog timer
-
+	puts("hello0?\n");
+	tester_notify_start();
+	puts("hello1?\n");
     while(1) {
+        puts("hello2!\n");
         Resume();
     }
 }
 
-void task_fann_load() {
-    /// TODO(rh):
+void task_fann_load(void) {
+    printf("load...");
+#ifdef PROFILE
+    /* Start counting clock cycles. */
+    profiler_start();
+#endif // PROFILE
+
+    ann = fann_create_from_header();
+    fann_reset_MSE(ann);
+#ifdef PROFILE
+    /* Stop counting clock cycles. */
+     uint32_t clk_cycles = profiler_stop();
+
+    /* Print profiling. */
+    printf("ANN initialisation:\n"
+           "-> execution cycles = %lu\n"
+           "-> execution time = %.3f ms\n\n",
+           clk_cycles, (float) clk_cycles / 8000);
+#endif // PROFILE
+
+    StartTask(TASK_FANN_TEST);
 }
 
-void task_fann_test() {
-    for (i = 0; i < num_data; i++) {
-            calc_out = fann_test(ann, input[i], output[i]);
+void task_fann_test(void) {
+#ifdef PROFILE
+    /* Start counting clock cycles. */
+    profiler_start();
+#endif // PROFILE
+
+    uint8_t i = num_data;
+    /* num_data from thyroid_test.h */
+    for (; i > 0; i--) {
+        fann_test(ann, input[i], output[i]);
     }
+
+#ifdef PROFILE
+    /* Stop counting clock cycles. */
+    uint32_t clk_cycles = profiler_stop();
+
+    /* Print profiling. */
+    printf("Run %u tests:\n"
+           "-> execution cycles = %lu (%lu per test)\n"
+           "-> execution time = %.3f ms (%.3f ms per test)\n\n",
+           i,
+           clk_cycles, clk_cycles / i,
+           (float) clk_cycles / 8000, (float) clk_cycles / 8000 / i);
+#endif // PROFILE
+
+    StartTask(TASK_RESULT);
+}
+
+char string[] = "done done done\n";
+
+void task_result(void) {
+    /* Print error. */
+    printf("MSE error on %d test data: %f\n\n", num_data, fann_get_MSE(ann));
+
+    /* Clean-up. */
+    fann_destroy(ann);
+    __no_operation();
+
+    while(1);
+
+    /*Report results*/
+    /* You need to include that statement at the termination of your intermittent program*/
+    tester_send_data(0, string, 57);
 }
 
 //
