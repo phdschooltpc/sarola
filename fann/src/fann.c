@@ -21,6 +21,10 @@
 
 extern struct fann fram_ann;
 
+
+#pragma NOINIT(fram_cascade_activation_functions)
+enum fann_activationfunc_enum fram_cascade_activation_functions[10 * sizeof(enum fann_activationfunc_enum)];
+
 /* INTERNAL FUNCTION
    Allocates the main structure and sets some default values.
  */
@@ -94,15 +98,7 @@ struct fann *fann_allocate_structure(unsigned int num_layers)
     ann->cascade_min_cand_epochs = 50;
     ann->cascade_candidate_scores = NULL;
     ann->cascade_activation_functions_count = 10;
-    ann->cascade_activation_functions = (enum fann_activationfunc_enum *) calloc(
-        ann->cascade_activation_functions_count,
-        sizeof(enum fann_activationfunc_enum)
-    );
-    if (ann->cascade_activation_functions == NULL) {
-        //fann_error(NULL, FANN_E_CANT_ALLOCATE_MEM);
-        free(ann);
-        return NULL;
-    }
+    ann->cascade_activation_functions = fram_cascade_activation_functions;
 
     ann->cascade_activation_functions[0] = FANN_SIGMOID;
     ann->cascade_activation_functions[1] = FANN_SIGMOID_SYMMETRIC;
