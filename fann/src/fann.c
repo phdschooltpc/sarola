@@ -21,9 +21,65 @@
 
 extern struct fann fram_ann;
 
+#define CASCADE_ACTIVATION_FUNCTIONS_COUNT   10
+#define CASCADE_ACTIVATION_FUNCTION_1        3
+#define CASCADE_ACTIVATION_FUNCTION_2        5
+#define CASCADE_ACTIVATION_FUNCTION_3        7
+#define CASCADE_ACTIVATION_FUNCTION_4        8
+#define CASCADE_ACTIVATION_FUNCTION_5        10
+#define CASCADE_ACTIVATION_FUNCTION_6        11
+#define CASCADE_ACTIVATION_FUNCTION_7        14
+#define CASCADE_ACTIVATION_FUNCTION_8        15
+#define CASCADE_ACTIVATION_FUNCTION_9        16
+#define CASCADE_ACTIVATION_FUNCTION_10       17
+#define CASCADE_ACTIVATION_STEEPNESSES_COUNT 4
+#define CASCADE_ACTIVATION_STEEPNESS_1       2.50000000000000000000e-01
+#define CASCADE_ACTIVATION_STEEPNESS_2       5.00000000000000000000e-01
+#define CASCADE_ACTIVATION_STEEPNESS_3       7.50000000000000000000e-01
+#define CASCADE_ACTIVATION_STEEPNESS_4       1.00000000000000000000e+00
 
+
+/*
 #pragma NOINIT(fram_cascade_activation_functions)
 enum fann_activationfunc_enum fram_cascade_activation_functions[10 * sizeof(enum fann_activationfunc_enum)];
+*/
+
+#pragma PERSISTENT(fram_cascade_activation_functions)
+enum fann_activationfunc_enum fram_cascade_activation_functions[10 * sizeof(enum fann_activationfunc_enum)] = {
+                                                                                                               /*
+    FANN_SIGMOID,
+    FANN_SIGMOID_SYMMETRIC,
+    FANN_GAUSSIAN,
+    FANN_GAUSSIAN_SYMMETRIC,
+    FANN_ELLIOT,
+    FANN_ELLIOT_SYMMETRIC,
+    FANN_SIN_SYMMETRIC,
+    FANN_COS_SYMMETRIC,
+    FANN_SIN,
+    FANN_COS*/
+   CASCADE_ACTIVATION_FUNCTION_1,
+   CASCADE_ACTIVATION_FUNCTION_2,
+   CASCADE_ACTIVATION_FUNCTION_3,
+   CASCADE_ACTIVATION_FUNCTION_4,
+   CASCADE_ACTIVATION_FUNCTION_5,
+   CASCADE_ACTIVATION_FUNCTION_6,
+   CASCADE_ACTIVATION_FUNCTION_7,
+   CASCADE_ACTIVATION_FUNCTION_8,
+   CASCADE_ACTIVATION_FUNCTION_9,
+   CASCADE_ACTIVATION_FUNCTION_10
+};
+
+#pragma PERSISTENT(fram_cascade_activation_steepnesses)
+fann_type fram_cascade_activation_steepnesses[4] = { /* 0.25, 0.5, 0.75, 1.0*/
+     CASCADE_ACTIVATION_STEEPNESS_1,
+     CASCADE_ACTIVATION_STEEPNESS_2,
+     CASCADE_ACTIVATION_STEEPNESS_3,
+     CASCADE_ACTIVATION_STEEPNESS_4
+};
+
+#pragma NOINIT(fram_first_layer)
+/// From thyroid_trained.h: NUM_LAYERS = 3
+struct fann_layer fram_first_layer[3];
 
 /* INTERNAL FUNCTION
    Allocates the main structure and sets some default values.
@@ -100,6 +156,7 @@ struct fann *fann_allocate_structure(unsigned int num_layers)
     ann->cascade_activation_functions_count = 10;
     ann->cascade_activation_functions = fram_cascade_activation_functions;
 
+    /*
     ann->cascade_activation_functions[0] = FANN_SIGMOID;
     ann->cascade_activation_functions[1] = FANN_SIGMOID_SYMMETRIC;
     ann->cascade_activation_functions[2] = FANN_GAUSSIAN;
@@ -110,8 +167,13 @@ struct fann *fann_allocate_structure(unsigned int num_layers)
     ann->cascade_activation_functions[7] = FANN_COS_SYMMETRIC;
     ann->cascade_activation_functions[8] = FANN_SIN;
     ann->cascade_activation_functions[9] = FANN_COS;
+    */
 
     ann->cascade_activation_steepnesses_count = 4;
+    /// This "works" but will result in two resets and loads :(
+    ann->cascade_activation_steepnesses = fram_cascade_activation_steepnesses;
+
+    /*
     ann->cascade_activation_steepnesses = (fann_type *) calloc(
         ann->cascade_activation_steepnesses_count,
         sizeof(fann_type)
@@ -122,11 +184,14 @@ struct fann *fann_allocate_structure(unsigned int num_layers)
         free(ann);
         return NULL;
     }
-
+    */
+    /*
     ann->cascade_activation_steepnesses[0] = (fann_type) 0.25;
     ann->cascade_activation_steepnesses[1] = (fann_type) 0.5;
     ann->cascade_activation_steepnesses[2] = (fann_type) 0.75;
     ann->cascade_activation_steepnesses[3] = (fann_type) 1.0;
+    */
+
 
     /* Variables for use with with Quickprop training (reasonable defaults) */
     ann->quickprop_decay = -0.0001f;
@@ -150,10 +215,12 @@ struct fann *fann_allocate_structure(unsigned int num_layers)
 
     /* these values are only boring defaults, and should really
      * never be used, since the real values are always loaded from a file. */
-    unsigned int decimal_point = 13;
-    unsigned int multiplier = 1 << decimal_point;
+    //unsigned int decimal_point = 13;
+    //unsigned int multiplier = 1 << decimal_point;
 
     /* allocate room for the layers */
+    ann->first_layer = fram_first_layer;
+    /*
     ann->first_layer = (struct fann_layer *) calloc(num_layers, sizeof(struct fann_layer));
     if(ann->first_layer == NULL) {
         //fann_error(NULL, FANN_E_CANT_ALLOCATE_MEM);
@@ -163,7 +230,7 @@ struct fann *fann_allocate_structure(unsigned int num_layers)
 #ifdef DEBUG_MALLOC
     printf("Allocated %u bytes for the layers.\n", num_layers * sizeof(struct fann_layer));
 #endif // DEBUG_MALLOC
-
+    */
     ann->last_layer = ann->first_layer + num_layers;
 
     return ann;

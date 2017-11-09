@@ -88,6 +88,7 @@ struct fann *fann_create_msp430()
     ann->cascade_candidate_limit = CASCADE_CANDIDATE_LIMIT;
     ann->cascade_weight_multiplier = CASCADE_WEIGHT_MULTIPLIER;
 
+    /*
     ann->cascade_activation_functions_count = CASCADE_ACTIVATION_FUNCTIONS_COUNT;
     // WARNING: dynamic allocation!
     ann->cascade_activation_functions = (enum fann_activationfunc_enum *) realloc(
@@ -103,8 +104,9 @@ struct fann *fann_create_msp430()
     printf("Re-allocated %u bytes for activation functions.\n",
             ann->cascade_activation_functions_count * sizeof(enum fann_activationfunc_enum));
 #endif // DEBUG_MALLOC
-
+    */
     // TODO: [not urgent] dynamically parse activation functions (macro)
+    /*
     uint8_t cascade_activation_functions[]= { 
         CASCADE_ACTIVATION_FUNCTION_1,
         CASCADE_ACTIVATION_FUNCTION_2,
@@ -121,7 +123,8 @@ struct fann *fann_create_msp430()
     for (i = 0; i < ann->cascade_activation_functions_count; i++) {
         ann->cascade_activation_functions[i] = (enum fann_activationfunc_enum) cascade_activation_functions[i];
     }
-
+    */
+    /*
     ann->cascade_activation_steepnesses_count = CASCADE_ACTIVATION_STEEPNESSES_COUNT;
     // WARNING: dynamic allocation!
     ann->cascade_activation_steepnesses = (fann_type *) realloc(
@@ -149,6 +152,7 @@ struct fann *fann_create_msp430()
     for (i = 0; i < ann->cascade_activation_steepnesses_count; i++) {
         ann->cascade_activation_steepnesses[i] = cascade_activation_steepnesses[i];
     }
+    */
 
 #ifdef FIXEDFANN
     fann_update_stepwise(ann);
