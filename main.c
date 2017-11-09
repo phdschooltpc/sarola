@@ -64,8 +64,9 @@ NewSelfField(TASK_FANN_TEST, sf_test_index, UINT8, 1, SELF_FIELD_CODE_1)
  *******************************************************************************
  */
 
-/// TODO(rh): This has to be persistent!
 static struct fann *ann;
+#pragma NOINIT(fram_ann)
+struct fann fram_ann;
 
 void main(void)
 {
@@ -75,6 +76,8 @@ void main(void)
                           // to activate previously configured port settings
     P1DIR |= BIT0;
     P1OUT &= ~BIT0;
+
+    puts("reset");
 
     tester_notify_start();
     while(1) {
@@ -89,8 +92,11 @@ void task_fann_load(void) {
     profiler_start();
 #endif // PROFILE
 
+    /// Assignment of ann is not needed
     ann = fann_create_from_header();
-    fann_reset_MSE(ann);
+    /// TODO(rh): Do not reset every time
+    fann_reset_MSE(&fram_ann);
+
 #ifdef PROFILE
     /* Stop counting clock cycles. */
      uint32_t clk_cycles = profiler_stop();
@@ -113,9 +119,12 @@ void task_fann_test(void) {
 
     uint8_t test_index;
     ReadSelfField_U8(TASK_FANN_TEST, sf_test_index, &test_index); // initially sf_array_index = 0
+    printf("test: %d\n", test_index);
 
-    fann_type* calc_out = fann_test(ann, input[test_index], output[test_index]);
-    tester_send_data(test_index, calc_out, sizeof(calc_out));
+    /*fann_type* calc_out = */
+    fann_test(&fram_ann, input[test_index], output[test_index]);
+
+    //tester_send_data(test_index, calc_out, sizeof(calc_out));
 
 #ifdef PROFILE
     /* Stop counting clock cycles. */
@@ -142,11 +151,13 @@ void task_fann_test(void) {
 }
 
 void task_result(void) {
+    //struct fann *ann = (struct fann *) ann_u8;
+
     /* Print error. */
-    printf("MSE error on %d test data: %f\n\n", num_data, fann_get_MSE(ann));
+    printf("MSE error on %d test data: %f\n\n", num_data, fann_get_MSE(&fram_ann));
 
     /* Clean-up. */
-    fann_destroy(ann);
+    fann_destroy(&fram_ann);
     __no_operation();
 
     puts("DONE\n");

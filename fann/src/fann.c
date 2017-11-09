@@ -19,24 +19,25 @@
 #include "config.h"
 #include "fann.h"
 
+extern struct fann fram_ann;
 
 /* INTERNAL FUNCTION
    Allocates the main structure and sets some default values.
  */
 struct fann *fann_allocate_structure(unsigned int num_layers)
 {
-    struct fann *ann;
+    struct fann *ann = &fram_ann;
 
     if (num_layers < 2) {
         return NULL;
     }
-
-    /* allocate and initialize the main network structure */
-    ann = (struct fann *) malloc(sizeof(struct fann));
-    if (ann == NULL) {
-        // fann_error(NULL, FANN_E_CANT_ALLOCATE_MEM);
-        return NULL;
-    }
+//
+//    /* allocate and initialize the main network structure */
+//    ann = (struct fann *) malloc(sizeof(struct fann));
+//    if (ann == NULL) {
+//        // fann_error(NULL, FANN_E_CANT_ALLOCATE_MEM);
+//        return NULL;
+//    }
 #ifdef DEBUG_MALLOC
     printf("Allocated %u bytes for ann.\n", sizeof(struct fann));
 #endif // DEBUG_MALLOC
