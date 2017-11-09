@@ -273,6 +273,15 @@ FANN_EXTERNAL void FANN_API fann_destroy(struct fann *ann)
 /* INTERNAL FUNCTION
    Allocates room for the neurons.
  */
+
+#pragma NOINIT(fram_neurons)
+/// From thyroid_trained.h: total neurons = 22+6+4
+struct fann_neuron fram_neurons[22+6+4];
+
+#pragma NOINIT(fram_output)
+/// From thyroid_trained.h: total neurons = 22+6+4
+fann_type fram_output[22+6+4];
+
 void fann_allocate_neurons(struct fann *ann)
 {
     struct fann_layer *layer_it;
@@ -281,7 +290,7 @@ void fann_allocate_neurons(struct fann *ann)
     unsigned int num_neurons = 0;
 
     /* all the neurons is allocated in one long array (calloc clears mem) */
-    neurons = (struct fann_neuron *) calloc(ann->total_neurons, sizeof(struct fann_neuron));
+    neurons = fram_neurons;//(struct fann_neuron *) calloc(ann->total_neurons, sizeof(struct fann_neuron));
     ann->total_neurons_allocated = ann->total_neurons;
     if (neurons == NULL) {
         //fann_error((struct fann_error *) ann, FANN_E_CANT_ALLOCATE_MEM);
@@ -298,11 +307,11 @@ void fann_allocate_neurons(struct fann *ann)
         num_neurons_so_far += num_neurons;
     }
 
-    ann->output = (fann_type *) calloc(num_neurons, sizeof(fann_type));
-    if (ann->output == NULL) {
+    ann->output = fram_output;//(fann_type *) calloc(num_neurons, sizeof(fann_type));
+    /*if (ann->output == NULL) {
         // fann_error((struct fann_error *) ann, FANN_E_CANT_ALLOCATE_MEM);
         return;
-    }
+    }*/
 }
 
 /* INTERNAL FUNCTION
