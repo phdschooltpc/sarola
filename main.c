@@ -55,7 +55,7 @@ InitialTask(TASK_FANN_LOAD)
 #pragma PERSISTENT(PersSField0(TASK_FANN_TEST, sf_test_index))
 #pragma PERSISTENT(PersSField1(TASK_FANN_TEST, sf_test_index))
 /* task, name, type, len, code */
-NewSelfField(TASK_FANN_TEST, sf_test_index, UINT8, 1, SELF_FIELD_CODE_1)
+NewSelfField(TASK_FANN_TEST, sf_test_index, UINT16, 1, SELF_FIELD_CODE_1)
 //
 
 /*
@@ -120,8 +120,10 @@ void task_fann_test(void) {
     P1OUT ^= BIT0;
 #endif
 
-    uint8_t test_index;
-    ReadSelfField_U8(TASK_FANN_TEST, sf_test_index, &test_index); // initially sf_array_index = 0
+    uint16_t test_index;
+    ReadSelfField_U16(TASK_FANN_TEST, sf_test_index, &test_index);
+    //uint8_t test_index;
+    //ReadSelfField_U8(TASK_FANN_TEST, sf_test_index, &test_index);
 
     fann_type* calc_out = fann_test(&fram_ann, input[test_index], output[test_index]);
 
@@ -134,7 +136,8 @@ void task_fann_test(void) {
         StartTask(TASK_RESULT);
     } else {
         /// Some data left? -> update field and call task again
-        WriteSelfField_U8(TASK_FANN_TEST, sf_test_index, &test_index);
+        //WriteSelfField_U8(TASK_FANN_TEST, sf_test_index, &test_index);
+        WriteSelfField_U16(TASK_FANN_TEST, sf_test_index, &test_index);
         StartTask(TASK_FANN_TEST);
     }
 }
