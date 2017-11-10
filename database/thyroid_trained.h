@@ -52,7 +52,7 @@
 #define LAYER_SIZE_3                         4
 #define SCALE_INCLUDED                       0
 
-fann_type neurons[][3] = {
+static fann_type neurons[][3] = {
     {0, 0, 0.00000000000000000000e+00},
     {0, 0, 0.00000000000000000000e+00},
     {0, 0, 0.00000000000000000000e+00},
@@ -87,7 +87,7 @@ fann_type neurons[][3] = {
     {0, 0, 0.00000000000000000000e+00} 
 };
 
-fann_type connections[][2] = {
+static fann_type connections[][2] = {
     {0, 3.61409354209899902344e+00},
     {1, -1.49772143363952636719e+00},
     {2, -3.82774543762207031250e+00},
