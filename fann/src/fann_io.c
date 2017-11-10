@@ -53,9 +53,11 @@ struct fann *fann_create_msp430()
     /* Allocate network. */
     // WARNING: dynamic allocation!
     ann = fann_allocate_structure((uint8_t) NUM_LAYERS);
+    /*
     if(ann == NULL) {
         return NULL;
     }
+    */
 
     /* Assign parameters. */
 
@@ -248,10 +250,6 @@ struct fann *fann_create_msp430()
 
     // WARNING: dynamic allocation!
     fann_allocate_connections(ann);
-    if (ann->errno_f == FANN_E_CANT_ALLOCATE_MEM) {
-        fann_destroy(ann);
-        return NULL;
-    }
 
     connected_neurons = ann->connections;
     weights = ann->weights;

@@ -87,6 +87,14 @@ fann_type fram_cascade_activation_steepnesses[4] = { /* 0.25, 0.5, 0.75, 1.0*/
 /// From thyroid_trained.h: NUM_LAYERS = 3
 struct fann_layer fram_first_layer[3];
 
+#pragma NOINIT(fram_neurons)
+/// From thyroid_trained.h: total neurons = 22+6+4
+struct fann_neuron fram_neurons[22+6+4];
+
+#pragma NOINIT(fram_output)
+/// From thyroid_trained.h: total neurons = 22+6+4
+fann_type fram_output[22+6+4];
+
 /* INTERNAL FUNCTION
    Allocates the main structure and sets some default values.
  */
@@ -97,16 +105,6 @@ struct fann *fann_allocate_structure(unsigned int num_layers)
     if (num_layers < 2) {
         return NULL;
     }
-//
-//    /* allocate and initialize the main network structure */
-//    ann = (struct fann *) malloc(sizeof(struct fann));
-//    if (ann == NULL) {
-//        // fann_error(NULL, FANN_E_CANT_ALLOCATE_MEM);
-//        return NULL;
-//    }
-#ifdef DEBUG_MALLOC
-    printf("Allocated %u bytes for ann.\n", sizeof(struct fann));
-#endif // DEBUG_MALLOC
 
     ann->errno_f = FANN_E_NO_ERROR;
     ann->error_log = fann_default_error_log;
@@ -162,41 +160,9 @@ struct fann *fann_allocate_structure(unsigned int num_layers)
     ann->cascade_activation_functions_count = 10;
     ann->cascade_activation_functions = fram_cascade_activation_functions;
 
-    /*
-    ann->cascade_activation_functions[0] = FANN_SIGMOID;
-    ann->cascade_activation_functions[1] = FANN_SIGMOID_SYMMETRIC;
-    ann->cascade_activation_functions[2] = FANN_GAUSSIAN;
-    ann->cascade_activation_functions[3] = FANN_GAUSSIAN_SYMMETRIC;
-    ann->cascade_activation_functions[4] = FANN_ELLIOT;
-    ann->cascade_activation_functions[5] = FANN_ELLIOT_SYMMETRIC;
-    ann->cascade_activation_functions[6] = FANN_SIN_SYMMETRIC;
-    ann->cascade_activation_functions[7] = FANN_COS_SYMMETRIC;
-    ann->cascade_activation_functions[8] = FANN_SIN;
-    ann->cascade_activation_functions[9] = FANN_COS;
-    */
-
     ann->cascade_activation_steepnesses_count = 4;
     /// This "works" but will result in two resets and loads :(
     ann->cascade_activation_steepnesses = fram_cascade_activation_steepnesses;
-
-    /*
-    ann->cascade_activation_steepnesses = (fann_type *) calloc(
-        ann->cascade_activation_steepnesses_count,
-        sizeof(fann_type)
-    );
-    if (ann->cascade_activation_steepnesses == NULL) {
-        fann_safe_free(ann->cascade_activation_functions);
-        //fann_error(NULL, FANN_E_CANT_ALLOCATE_MEM);
-        free(ann);
-        return NULL;
-    }
-    */
-    /*
-    ann->cascade_activation_steepnesses[0] = (fann_type) 0.25;
-    ann->cascade_activation_steepnesses[1] = (fann_type) 0.5;
-    ann->cascade_activation_steepnesses[2] = (fann_type) 0.75;
-    ann->cascade_activation_steepnesses[3] = (fann_type) 1.0;
-    */
 
 
     /* Variables for use with with Quickprop training (reasonable defaults) */
@@ -226,17 +192,6 @@ struct fann *fann_allocate_structure(unsigned int num_layers)
 
     /* allocate room for the layers */
     ann->first_layer = fram_first_layer;
-    /*
-    ann->first_layer = (struct fann_layer *) calloc(num_layers, sizeof(struct fann_layer));
-    if(ann->first_layer == NULL) {
-        //fann_error(NULL, FANN_E_CANT_ALLOCATE_MEM);
-        free(ann);
-        return NULL;
-    }
-#ifdef DEBUG_MALLOC
-    printf("Allocated %u bytes for the layers.\n", num_layers * sizeof(struct fann_layer));
-#endif // DEBUG_MALLOC
-    */
     ann->last_layer = ann->first_layer + num_layers;
 
     return ann;
@@ -279,15 +234,6 @@ FANN_EXTERNAL void FANN_API fann_destroy(struct fann *ann)
 /* INTERNAL FUNCTION
    Allocates room for the neurons.
  */
-
-#pragma NOINIT(fram_neurons)
-/// From thyroid_trained.h: total neurons = 22+6+4
-struct fann_neuron fram_neurons[22+6+4];
-
-#pragma NOINIT(fram_output)
-/// From thyroid_trained.h: total neurons = 22+6+4
-fann_type fram_output[22+6+4];
-
 void fann_allocate_neurons(struct fann *ann)
 {
     struct fann_layer *layer_it;
@@ -296,16 +242,8 @@ void fann_allocate_neurons(struct fann *ann)
     unsigned int num_neurons = 0;
 
     /* all the neurons is allocated in one long array (calloc clears mem) */
-    neurons = fram_neurons;//(struct fann_neuron *) calloc(ann->total_neurons, sizeof(struct fann_neuron));
+    neurons = fram_neurons;
     ann->total_neurons_allocated = ann->total_neurons;
-    if (neurons == NULL) {
-        //fann_error((struct fann_error *) ann, FANN_E_CANT_ALLOCATE_MEM);
-        return;
-    }
-#ifdef DEBUG_MALLOC
-    printf("Allocated %u bytes for neurons.\n", ann->total_neurons * sizeof(struct fann_neuron));
-#endif // DEBUG_MALLOC
-
     for (layer_it = ann->first_layer; layer_it != ann->last_layer; layer_it++) {
         num_neurons = (unsigned int) (layer_it->last_neuron - layer_it->first_neuron);
         layer_it->first_neuron = neurons + num_neurons_so_far;
@@ -313,11 +251,7 @@ void fann_allocate_neurons(struct fann *ann)
         num_neurons_so_far += num_neurons;
     }
 
-    ann->output = fram_output;//(fann_type *) calloc(num_neurons, sizeof(fann_type));
-    /*if (ann->output == NULL) {
-        // fann_error((struct fann_error *) ann, FANN_E_CANT_ALLOCATE_MEM);
-        return;
-    }*/
+    ann->output = fram_output;
 }
 
 /* INTERNAL FUNCTION
@@ -329,7 +263,7 @@ void fann_allocate_connections(struct fann *ann)
     ann->total_connections_allocated = ann->total_connections;
 
     ann->connections = fram_connections;
-    }
+}
 
 FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 {
