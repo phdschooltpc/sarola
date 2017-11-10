@@ -68,16 +68,19 @@ static struct fann *ann;
 #pragma NOINIT(fram_ann)
 struct fann fram_ann;
 
+#define DEBUG
+#define PROFILE
+
 void main(void)
 {
     WDTCTL = WDTPW | WDTHOLD;   // stop watchdog timer
+#ifdef DEBUG
     /* Prepare LED. */
     PM5CTL0 &= ~LOCKLPM5; // Disable the GPIO power-on default high-impedance mode
                           // to activate previously configured port settings
     P1DIR |= BIT0;
     P1OUT &= ~BIT0;
-
-    puts("reset");
+#endif
 
     tester_notify_start();
     while(1) {
@@ -86,17 +89,13 @@ void main(void)
 }
 
 void task_fann_load(void) {
-    puts("load...\n");
 #ifdef PROFILE
     /* Start counting clock cycles. */
     profiler_start();
 #endif // PROFILE
 
-    /// Assignment of ann is not needed
-    ann = fann_create_from_header();
-    /// TODO(rh): Do not reset every time
+    fann_create_from_header();
     fann_reset_MSE(&fram_ann);
-
 #ifdef PROFILE
     /* Stop counting clock cycles. */
      uint32_t clk_cycles = profiler_stop();
@@ -107,37 +106,24 @@ void task_fann_load(void) {
            "-> execution time = %.3f ms\n\n",
            clk_cycles, (float) clk_cycles / 8000);
 #endif // PROFILE
-
-    StartTask(TASK_FANN_TEST);
-}
-
-void task_fann_test(void) {
+    // Start profiler for testing
 #ifdef PROFILE
     /* Start counting clock cycles. */
     profiler_start();
 #endif // PROFILE
+    StartTask(TASK_FANN_TEST);
+}
+
+void task_fann_test(void) {
+    /// Toggle LED for every time
+#ifdef DEBUG
+    P1OUT ^= BIT0;
+#endif
 
     uint8_t test_index;
     ReadSelfField_U8(TASK_FANN_TEST, sf_test_index, &test_index); // initially sf_array_index = 0
-    printf("test: %d\n", test_index);
 
-    /*fann_type* calc_out = */
-    fann_test(&fram_ann, input[test_index], output[test_index]);
-
-    //tester_send_data(test_index, calc_out, sizeof(calc_out));
-
-#ifdef PROFILE
-    /* Stop counting clock cycles. */
-    uint32_t clk_cycles = profiler_stop();
-
-    /* Print profiling. */
-    printf("Run %u tests:\n"
-           "-> execution cycles = %lu (%lu per test)\n"
-           "-> execution time = %.3f ms (%.3f ms per test)\n\n",
-           test_index,
-           clk_cycles, clk_cycles / test_index,
-           (float) clk_cycles / 8000, (float) clk_cycles / 8000 / test_index);
-#endif // PROFILE
+    fann_type* calc_out = fann_test(&fram_ann, input[test_index], output[test_index]);
 
     /// All data processed? -> Done!
     if(++test_index == num_data) {
@@ -147,22 +133,34 @@ void task_fann_test(void) {
         WriteSelfField_U8(TASK_FANN_TEST, sf_test_index, &test_index);
         StartTask(TASK_FANN_TEST);
     }
-
 }
 
 void task_result(void) {
-    //struct fann *ann = (struct fann *) ann_u8;
+#ifdef DEBUG
+    /// Turn on LED
+    P1OUT |= BIT0;
+#endif
+
+#ifdef PROFILE
+    /* Stop counting clock cycles. */
+    uint32_t clk_cycles = profiler_stop();
+
+    /* Print profiling. */
+    printf("Run %u tests:\n"
+           "-> execution cycles = %lu (%lu per test)\n"
+           "-> execution time = %.3f ms (%.3f ms per test)\n\n",
+           num_data,
+           clk_cycles, clk_cycles / num_data,
+           (float) clk_cycles / 8000, (float) clk_cycles / 8000 / num_data);
+#endif // PROFILE
 
     /* Print error. */
     printf("MSE error on %d test data: %f\n\n", num_data, fann_get_MSE(&fram_ann));
 
     /* Clean-up. */
-    fann_destroy(&fram_ann);
-    __no_operation();
-
-    puts("DONE\n");
-
-    P1OUT |= BIT0;
+    /// TODO(rh): Clean-up is not working because of free() calls
+    //fann_destroy(&fram_ann);
+    //__no_operation();
 
     while(1);
 
