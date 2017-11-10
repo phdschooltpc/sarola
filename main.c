@@ -145,7 +145,9 @@ void task_fann_test(void) {
 void task_result(void) {
 #ifdef DEBUG
     /// Turn on LED
-    P1OUT |= BIT0;
+    /// Error for 400 tests: 0.022107
+    if( (fann_get_MSE(&fram_ann) - 0.022107) < 0.001 )
+        P1OUT |= BIT0;
 #endif
 
 #ifdef PROFILE
