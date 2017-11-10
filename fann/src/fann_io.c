@@ -22,6 +22,10 @@
 
 #include "thyroid_trained.h"
 
+#define NUM_CONNECTIONS ( (sizeof(connections)) / (2 * sizeof(fann_type)) )
+#define NUM_NEURONS ( sizeof(neurons) / ( 3 * sizeof(fann_type) ) )
+
+
 
 /**
  * INTERNAL FUNCTION

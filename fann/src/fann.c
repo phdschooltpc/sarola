@@ -20,6 +20,8 @@
 #include "fann.h"
 
 #include "thyroid_trained.h"
+#define NUM_CONNECTIONS ( (sizeof(connections)) / (2 * sizeof(fann_type)) )
+#define NUM_NEURONS ( sizeof(neurons) / ( 3 * sizeof(fann_type) ) )
 
 extern struct fann fram_ann;
 
