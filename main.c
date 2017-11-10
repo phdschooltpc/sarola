@@ -82,7 +82,6 @@ void main(void)
     P1OUT &= ~BIT0;
 #endif
 
-    tester_notify_start();
     while(1) {
         Resume();
     }
@@ -93,6 +92,7 @@ void task_fann_load(void) {
     /* Start counting clock cycles. */
     profiler_start();
 #endif // PROFILE
+    tester_notify_start();
 
     fann_create_from_header();
     fann_reset_MSE(&fram_ann);
@@ -129,7 +129,7 @@ void task_fann_test(void) {
 
     /*Report results*/
     /* You need to include that statement at the termination of your intermittent program*/
-    tester_send_data(test_index, output[test_index], 3*sizeof(fann_type*));
+    //tester_send_data(test_index, output[test_index], 3*sizeof(fann_type*));
 
     /// All data processed? -> Done!
     if(++test_index == num_data) {
