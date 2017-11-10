@@ -26,3 +26,7 @@ Run 300 tests:
 -> execution time = 1402.069 ms (4.674 ms per test)
 
 MSE error on 300 test data: 0.020987
+
+## Presentation
+
+Run `pdflatex presentation.tex` to generate the PDF file.
