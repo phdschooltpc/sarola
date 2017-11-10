@@ -2,10 +2,17 @@
 
 
 ## Approach 
+
+
 We took following steps to increase speed per test.
+
 	1.  Removed all mallocs and callocs to have static allocation of memory to variables 
+
 	2.  Divided different function for neural network load and test in tasks so that they are intermittent safe.
+
 	3.  Reduced the number of hidden layers from 5 to 1.
+
+	
 ## Tests
 
 We ran 300 tests and the results are as following.
