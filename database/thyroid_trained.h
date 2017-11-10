@@ -87,6 +87,8 @@ static fann_type neurons[][3] = {
     {0, 0, 0.00000000000000000000e+00} 
 };
 
+#define NUM_NEURONS (LAYER_SIZE_1 + LAYER_SIZE_2 + LAYER_SIZE_3)
+
 static fann_type connections[][2] = {
     {0, 3.61409354209899902344e+00},
     {1, -1.49772143363952636719e+00},
@@ -217,6 +219,9 @@ static fann_type connections[][2] = {
     {26, -6.25186681747436523438e-01},
     {27, -6.91229867935180664062e+00} 
 };
+
+#define NUM_CONNECTIONS (128)
+// BETTER: sizeof( connections ) / ( 2*sizeof(fann_type) )
 
 
 #endif // __THYROID_TRAINED__

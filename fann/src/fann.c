@@ -19,6 +19,8 @@
 #include "config.h"
 #include "fann.h"
 
+#include "thyroid_trained.h"
+
 extern struct fann fram_ann;
 
 #define CASCADE_ACTIVATION_FUNCTIONS_COUNT   10
@@ -45,13 +47,13 @@ enum fann_activationfunc_enum fram_cascade_activation_functions[10 * sizeof(enum
 */
 
 #pragma NOINIT(fram_weights)
-fann_type fram_weights [(128) * sizeof(fann_type)];
+fann_type fram_weights [NUM_CONNECTIONS * sizeof(fann_type)];
 
 #pragma NOINIT(fram_connections)
-struct fann_neuron* fram_connections [(128) * sizeof(struct fann_neuron*)];
+struct fann_neuron* fram_connections [NUM_CONNECTIONS * sizeof(struct fann_neuron*)];
 
 #pragma PERSISTENT(fram_cascade_activation_functions)
-enum fann_activationfunc_enum fram_cascade_activation_functions[10 * sizeof(enum fann_activationfunc_enum)] = {
+enum fann_activationfunc_enum fram_cascade_activation_functions[CASCADE_ACTIVATION_FUNCTIONS_COUNT * sizeof(enum fann_activationfunc_enum)] = {
                                                                                                                /*
     FANN_SIGMOID,
     FANN_SIGMOID_SYMMETRIC,
@@ -76,7 +78,7 @@ enum fann_activationfunc_enum fram_cascade_activation_functions[10 * sizeof(enum
 };
 
 #pragma PERSISTENT(fram_cascade_activation_steepnesses)
-fann_type fram_cascade_activation_steepnesses[4] = { /* 0.25, 0.5, 0.75, 1.0*/
+fann_type fram_cascade_activation_steepnesses[CASCADE_ACTIVATION_STEEPNESSES_COUNT] = { /* 0.25, 0.5, 0.75, 1.0*/
      CASCADE_ACTIVATION_STEEPNESS_1,
      CASCADE_ACTIVATION_STEEPNESS_2,
      CASCADE_ACTIVATION_STEEPNESS_3,
@@ -85,15 +87,15 @@ fann_type fram_cascade_activation_steepnesses[4] = { /* 0.25, 0.5, 0.75, 1.0*/
 
 #pragma NOINIT(fram_first_layer)
 /// From thyroid_trained.h: NUM_LAYERS = 3
-struct fann_layer fram_first_layer[3];
+struct fann_layer fram_first_layer[NUM_LAYERS];
 
 #pragma NOINIT(fram_neurons)
 /// From thyroid_trained.h: total neurons = 22+6+4
-struct fann_neuron fram_neurons[22+6+4];
+struct fann_neuron fram_neurons[NUM_NEURONS];
 
 #pragma NOINIT(fram_output)
 /// From thyroid_trained.h: total neurons = 22+6+4
-fann_type fram_output[22+6+4];
+fann_type fram_output[NUM_NEURONS];
 
 /* INTERNAL FUNCTION
    Allocates the main structure and sets some default values.
