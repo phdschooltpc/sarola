@@ -125,6 +125,10 @@ void task_fann_test(void) {
 
     fann_type* calc_out = fann_test(&fram_ann, input[test_index], output[test_index]);
 
+    /*Report results*/
+    /* You need to include that statement at the termination of your intermittent program*/
+    tester_send_data(test_index, output[test_index], 3*sizeof(fann_type*));
+
     /// All data processed? -> Done!
     if(++test_index == num_data) {
         StartTask(TASK_RESULT);
@@ -164,7 +168,5 @@ void task_result(void) {
 
     while(1);
 
-    /*Report results*/
-    /* You need to include that statement at the termination of your intermittent program*/
-    //tester_send_data(0, string, 15);
+
 }
