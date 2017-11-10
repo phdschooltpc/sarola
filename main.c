@@ -68,8 +68,8 @@ static struct fann *ann;
 #pragma NOINIT(fram_ann)
 struct fann fram_ann;
 
-#define DEBUG
-#define PROFILE
+//#define DEBUG
+//#define PROFILE
 
 void main(void)
 {
